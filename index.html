@@ -1,49 +1,86 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Car Example</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+        renderer.shadowMap.enabled = true;
 
-    <head>
-        <meta charset="UTF-8">
-        <title>Demo</title>
-        <!-- three.jsを読み込む(CDN) -->
-        <script src="https://cdnjs.cloudflame.com/ajax/libs/three.js/r128/three.min.js"></script>
-    </head>
+        // OrbitControls setup
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        camera.position.set(0, 5, 10);
+        controls.update();
 
-    <body>
-        <script>
-            var init = function(){
-            var width = 800,
-                height = 600;
-                //レンダラー
-                var renderer = new THREE.WebGLRenderer();
-                renderer.setSize(width,height);
-                document.body.appendChild(renderer.domElement);
-                //シーン
-                var scene = new THREE.Scene();
-                // カメラを作成
-                var camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000); 
-                // 平行光源
-                var directionalLight = new THREE.DirectionalLight(0xffffff); 
-                directionalLight.position.set(1, 1, 1); 
-                scene.add(directionalLight); 
-                // 箱を作成
-                var geometry = new THREE.BoxGeometry(1, 1, 1); 
-                var material = new THREE.MeshPhongMaterial({ color: 0x0000ff }); 
-                var box = new THREE.Mesh(geometry, material); 
-                box.position.z = -5; 
-                scene.add(box);
-                //描画処理
-                // 初回実行
-                var update = function() { 
-                    requestAnimationFrame(update); 
-                    // 箱を回転させる
-                    box.rotation.x += 0.01; 
-                    box.rotation.y += 0.01; 
-                    
-                    renderer.render(scene, camera); 
-                }; 
-                update();
-            }
-            window.addEventListener('DOMContentLoaded', init);
-        </script>
-    </body>
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 10, 10);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        // Car body
+        const carGroup = new THREE.Group();
+        
+        const bodyGeometry = new THREE.BoxGeometry(4, 1.5, 2);
+        const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
+        const carBody = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        carBody.position.y = 1;
+        carBody.castShadow = true;
+        carGroup.add(carBody);
+        
+        // Wheels
+        const wheelGeometry = new THREE.CylinderGeometry(0.4, 0.4, 0.4, 32);
+        const wheelMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+        
+        const createWheel = (x, z) => {
+            const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+            wheel.rotation.z = Math.PI / 2;
+            wheel.position.set(x, 0.4, z);
+            wheel.castShadow = true;
+            return wheel;
+        };
+        
+        carGroup.add(createWheel(-1.5, -1));
+        carGroup.add(createWheel(1.5, -1));
+        carGroup.add(createWheel(-1.5, 1));
+        carGroup.add(createWheel(1.5, 1));
+
+        scene.add(carGroup);
+
+        // Ground
+        const groundGeometry = new THREE.PlaneGeometry(200, 200);
+        const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x008800 });
+        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.y = 0;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    </script>
+</body>
 </html>

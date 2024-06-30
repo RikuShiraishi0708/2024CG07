@@ -13,12 +13,10 @@
             var init= functionn(){
             var width = 800,
                 height = 600;
-
                 //レンダラー
                 var renderer = new THREE.WebGLRenderer();
                 renderer.setSize(width,height);
                 document.body.appendChild(renderer.domElement);
-
                 //シーン
                 var scene = new THREE.Scene();
                 // カメラを作成
@@ -40,6 +38,7 @@
                     // 箱を回転させる
                     box.rotation.x += 0.01; 
                     box.rotation.y += 0.01; 
+                    
                     renderer.render(scene, camera); 
                 }; 
                 update();
